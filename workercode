@@ -1,12 +1,11 @@
-addEventListener("fetch", event => {
-  event.respondWith(doRedirects(event.request))
-})
-
-const newLocationHost = "developers.cloudflare.com";
-
 async function doRedirects(request) {
   let reqUA = request.headers.get('user-agent')
-  if (reqUA.includes('curl')) {
+  let cookie = request.headers.get('cookie')
+
+  if (cookie && cookie.includes('cf-noredir=true')) {
+    // Bypass redirect if cookie is present
+    return fetch(request.clone())
+  } else if (reqUA.includes('curl')) {
     let newLocation = "https://" + newLocationHost
     return Response.redirect(newLocation, 302)
   }
